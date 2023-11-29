@@ -1,0 +1,111 @@
+#include <stdio.h>
+
+// Maximum number of memory blocks
+#define MAX_BLOCKS 100
+
+// Structure to represent a memory block
+struct MemoryBlock {
+    int size;
+    int allocated;
+};
+
+// Function prototypes
+void initializeMemory(struct MemoryBlock memory[], int numBlocks);
+int bestFit(struct MemoryBlock memory[], int numBlocks, int processSize);
+void allocateMemory(struct MemoryBlock memory[], int blockIndex, int processSize);
+void deallocateMemory(struct MemoryBlock memory[], int blockIndex);
+
+int main() {
+    struct MemoryBlock memory[MAX_BLOCKS];
+    int numBlocks, processSize, choice;
+
+    printf("Enter the number of memory blocks: ");
+    scanf("%d", &numBlocks);
+
+    initializeMemory(memory, numBlocks);
+
+    do {
+        printf("\n1. Allocate Memory\n");
+        printf("2. Deallocate Memory\n");
+        printf("3. Display Memory Status\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter the size of the process: ");
+                scanf("%d", &processSize);
+                int blockIndex = bestFit(memory, numBlocks, processSize);
+                if (blockIndex != -1) {
+                    allocateMemory(memory, blockIndex, processSize);
+                    printf("Memory allocated successfully.\n");
+                } else {
+                    printf("Insufficient memory to allocate.\n");
+                }
+                break;
+
+            case 2:
+                printf("Enter the index of the block to deallocate: ");
+                scanf("%d", &blockIndex);
+                if (blockIndex >= 0 && blockIndex < numBlocks && memory[blockIndex].allocated) {
+                    deallocateMemory(memory, blockIndex);
+                    printf("Memory deallocated successfully.\n");
+                } else {
+                    printf("Invalid block index or block is not allocated.\n");
+                }
+                break;
+
+            case 3:
+                printf("Memory Status:\n");
+                for (int i = 0; i < numBlocks; i++) {
+                    printf("Block %d: Size=%d Allocated=%s\n", i, memory[i].size,
+                           memory[i].allocated ? "Yes" : "No");
+                }
+                break;
+
+            case 4:
+                printf("Exiting program.\n");
+                break;
+
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+
+    } while (choice != 4);
+
+    return 0;
+}
+
+void initializeMemory(struct MemoryBlock memory[], int numBlocks) {
+    for (int i = 0; i < numBlocks; i++) {
+        printf("Enter the size of block %d: ", i);
+        scanf("%d", &memory[i].size);
+        memory[i].allocated = 0;
+    }
+}
+
+int bestFit(struct MemoryBlock memory[], int numBlocks, int processSize) {
+    int bestFitIndex = -1;
+
+    for (int i = 0; i < numBlocks; i++) {
+        if (!memory[i].allocated && memory[i].size >= processSize) {
+            if (bestFitIndex == -1 || memory[i].size < memory[bestFitIndex].size) {
+                bestFitIndex = i;
+            }
+        }
+    }
+
+    return bestFitIndex;
+}
+
+void allocateMemory(struct MemoryBlock memory[], int blockIndex, int processSize) {
+    if (memory[blockIndex].size >= processSize) {
+        memory[blockIndex].size -= processSize;
+        memory[blockIndex].allocated = 1;
+    }
+}
+
+void deallocateMemory(struct MemoryBlock memory[], int blockIndex) {
+    memory[blockIndex].allocated = 0;
+}
